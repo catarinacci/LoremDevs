@@ -1,5 +1,7 @@
 import { Repository } from "./RepositoryTypes";
 
+//servicio de usuario
+
 export interface User {
     id: string;
     name: string;
