@@ -1,15 +1,8 @@
-// import { Router } from "express";
+import { Router } from "express";
+import { register } from "../../controllers/auth";
 
-// const router = Router();
+const authRoutes = Router();
 
-/*export default () => {
-    router.get("/healt", (req, res) => {
-        res.send("Api is Healthy!!!");
-    });
-
-    return router;
-};*/
-// router.get("/", (req,res)=>{
-//     res.send("Api Prueba")
-// })
-// export default router;
+//authRoutes.post("/register", register.check, register.do);
+authRoutes.post("/register",register.check, register.do);
+export default authRoutes;
