@@ -35,7 +35,7 @@ export function validateBody(req: Request, next: NextFunction,res:Response, sche
         }
         res.status(400)
             .json({
-            success: true,
+            success: false,
             message: errors
             });
         
