@@ -1,4 +1,4 @@
-import express  from "express";
+import express, {Express, Application}  from "express";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import "./database/database"
@@ -10,10 +10,10 @@ import fileUpload from "express-fileupload";
 dotenv.config();
 
 //initializations
-const app = express();
+const app: Express = express();
 const corsOptions = {
   //To allow requests from client
-  origin: ["http://localhost:3000", "https://blog-point-nine.vercel.app"],
+  origin: ["*"],
   credentials: true,
   exposedHeaders: ["set-cookie"],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",

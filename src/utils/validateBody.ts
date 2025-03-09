@@ -40,7 +40,7 @@ export function validateBody(req: Request, next: NextFunction,res:Response, sche
             });
         
         next(errors);
-      
+        return
     } else{
         // res.status(200)
         //     .json({
