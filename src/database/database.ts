@@ -8,6 +8,7 @@ export default (async ()=>{
     try {
         await mongoose.connect(mongoDbURL)
         console.log("DB online");
+         
     } catch (error) {
         console.log("error :>>",error);
         process.exit(1);

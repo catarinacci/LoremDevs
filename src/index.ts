@@ -6,6 +6,7 @@ import cors from "cors"
 import bodyParser from "body-parser";
 import authRoutes from "./routes/auth";
 import fileUpload from "express-fileupload";
+import saleRoutes from "./routes/sale";
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.get('/', (req, res)=>{
 });
 
 app.use('/api', authRoutes);
+app.use('/', saleRoutes);
 
 app.listen(app.get('port'));
 console.log('Server on port', app.get('port'))

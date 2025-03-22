@@ -18,7 +18,9 @@ export const validateJWT = (req:Request, res:Response, next:NextFunction):void =
     try {
       const uid = jwt.verify(token as string, process.env.SECRETORPRIVATEKEY as string)as IPayload; 
       req.userId = uid._id
-      //console.log("uid",uid)   
+      // console.log(uid)
+      // console.log("uid",uid._id) 
+      // console.log(req.userId)  
       next();
     } catch (error) {
       console.log("error", error);

@@ -2,10 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import user,{ IUser } from '../../models/user';
 import * as Joi from 'joi';
 import * as bcrypt from 'bcrypt';
-import { validateBody } from '../../utils/validateBody';
-import cloudinary from '../../utils/cloudinary';
+import { validateBody } from '../../helpers/validateBody';
+import cloudinary from '../../helpers/cloudinary';
 import  jwt  from 'jsonwebtoken';
-import { token } from 'morgan';
+import { generateJWT, generateRefreshJWT } from '../../helpers/generateJWT';
 
 export const register = {
   check: (req: Request, res: Response, next: NextFunction) => {
@@ -107,8 +107,13 @@ export const login = {
       });
       return
     }
-    const token: string = jwt.sign({_id:targetUser._id}, process.env.SECRETORPRIVATEKEY as string,{expiresIn: "24h"})
-    const refreshToken: string = jwt.sign({_id:targetUser._id}, process.env.SECRETORPRIVATEKEY as string,{expiresIn: "7d"})  
+    const id: string = targetUser._id as string
+    //const id: string | null = null
+    //console.log(id)
+    //const token: string = jwt.sign({_id:targetUser._id}, process.env.SECRETORPRIVATEKEY as string,{expiresIn: "24h"})
+    const token: string = await generateJWT(id)
+    const refreshToken: string = await generateRefreshJWT(id)
+    //const refreshToken: string = jwt.sign({_id:targetUser._id}, process.env.SECRETORPRIVATEKEY as string,{expiresIn: "7d"})  
 
     res.status(200).json({
       success: true,
@@ -121,7 +126,7 @@ export const login = {
 
 export const profile = {
   do: async (req:Request, res:Response, next:NextFunction) => {
-
+    //console.log (req.userId)
     const targetUser = await user.findById(req.userId);
     
     if(!targetUser){
@@ -136,3 +141,19 @@ export const profile = {
     });
   },
 };
+
+export const showUsers = async (req:Request, res:Response, next:NextFunction)=>{
+
+  const users = await user.find()
+  console.log("Usuarios")
+  if(!users){
+    res.status(404).json({
+      success: false,
+      message: "No hay usuarios",
+    });
+    return
+  }res.status(200).json({
+    success: true,
+    user:users
+  });
+}
