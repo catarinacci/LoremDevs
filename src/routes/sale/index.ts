@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { totalSalesDay } from "../../controllers/sale";
+import { totalSalesDay, totalSalesMonth } from "../../controllers/sale";
 
 
 const saleRoutes = Router();
@@ -8,4 +8,5 @@ const saleRoutes = Router();
 // authRoutes.post("/login", login.check, login.do);
 // authRoutes.get("/profile", validateJWT, profile.do);
 saleRoutes.post("/total-sales-day",totalSalesDay);
+saleRoutes.post("/total-sales-month", totalSalesMonth.check, totalSalesMonth.do);
 export default saleRoutes;
