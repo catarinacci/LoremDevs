@@ -2,10 +2,6 @@ import jwt from "jsonwebtoken";
 
 export const generateJWT = async (uid: string ): Promise<string> => {
     return new Promise((resolve, reject) => {
-      // const payload: { uid: string } = { uid };
-      // console.log("uid",uid)
-      // console.log(payload)
-      //jwt.sign({_id:}, process.env.SECRETORPRIVATEKEY as string,{expiresIn: "7d"}) 
       jwt.sign(
         {_id:uid},
         process.env.SECRETORPRIVATEKEY as string,
@@ -25,9 +21,6 @@ export const generateJWT = async (uid: string ): Promise<string> => {
 };
 export const generateRefreshJWT = async (uid: string): Promise<string> => {
     return new Promise((resolve, reject) => {
-      // const payload: { uid: string} = { uid };
-      // console.log("uid",uid)
-      // console.log(payload)
       jwt.sign(
         {_id:uid},
         process.env.SECRETORPRIVATEKEY as string,
