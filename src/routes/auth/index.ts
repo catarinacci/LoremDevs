@@ -1,11 +1,11 @@
 import { Router } from "express";
+import { register,login,profile, showUsers } from "../../controllers/auth";
+import { validateJWT } from "../../middleware/validateJWT";
 
-const router = Router();
+const authRoutes = Router();
 
-export default () => {
-    router.get("/healt", (req, res) => {
-        res.send("Api is Healthy!!!");
-    });
-
-    return router;
-};
+authRoutes.post("/register",register.check, register.do);
+authRoutes.post("/login", login.check, login.do);
+authRoutes.get("/profile", validateJWT, profile.do);
+authRoutes.get("/show-users",showUsers);
+export default authRoutes;
