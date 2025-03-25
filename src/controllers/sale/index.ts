@@ -9,6 +9,7 @@ export const totalSalesDay = async (
   res: Response,
   next: NextFunction
 ) => {
+  
   const dateParamns = req.params.date;
   console.log(dateParamns);
 

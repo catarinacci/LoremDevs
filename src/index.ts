@@ -7,6 +7,7 @@ import bodyParser from "body-parser";
 import authRoutes from "./routes/auth";
 import fileUpload from "express-fileupload";
 import saleRoutes from "./routes/sale";
+import productRoutes from "./routes/product";
 
 dotenv.config();
 
@@ -41,7 +42,7 @@ app.get('/', (req, res)=>{
 });
 
 app.use('/api', authRoutes);
-app.use('/', saleRoutes);
+app.use('/', saleRoutes,productRoutes);
 
 app.listen(app.get('port'));
 console.log('Server on port', app.get('port'))
