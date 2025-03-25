@@ -3,6 +3,7 @@ import sale from "../../models/sale";
 import { isDateNaN } from "../../helpers/isDateNaN";
 import { addVal0 } from "../../helpers/addVal0";
 import { isMonth12 } from "../../helpers/isMonth12";
+import { validateStatus } from "../../helpers/validateStatus";
 
 export const totalSalesDay = async (
   req: Request,
@@ -137,3 +138,38 @@ export const totalSalesMonth = async (req: Request, res: Response, next: NextFun
       return
     }
 };
+
+export const ordersStatus = async (req: Request, res: Response, next: NextFunction)=>{
+  const status = req.params.status
+  const page = Number(req.query.p) | 0;
+  const pageSize = 10;
+
+  //compruebo que la variable status sea valida para poder realizar la consulta
+  validateStatus(res,status)
+  
+  const sales = await sale.aggregate(
+    [
+      {
+        $match: {
+          status: status
+        }
+      },
+      {
+        $sort:       
+          {
+            createdAt: -1
+          }
+      },
+      {
+        $facet: {
+          metadata: [{ $count: "count" }],
+          data: [{ $skip: page * pageSize }, { $limit: pageSize }],
+        },
+      },
+    ]
+  )
+  res.json({
+    status:status,
+    sales:sales
+  })
+}
