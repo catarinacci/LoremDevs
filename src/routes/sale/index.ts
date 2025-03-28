@@ -10,7 +10,7 @@ const saleRoutes = Router();
 // authRoutes.post("/login", login.check, login.do);
 // authRoutes.get("/profile", validateJWT, profile.do);
 saleRoutes.get("/total-sales-day",totalSalesDay);
-saleRoutes.get("/total-sales-month/:date", totalSalesMonth);
+saleRoutes.get("/total-sales-month", totalSalesMonth);
 saleRoutes.get("/orders-status",validateStatus, ordersStatus);
 
 export default saleRoutes;
