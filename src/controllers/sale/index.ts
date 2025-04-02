@@ -1,58 +1,56 @@
 import { Request, Response, NextFunction } from "express";
 import sale from "../../models/sale";
-import { isDateNaN } from "../../helpers/isDateNaN";
-import { addVal0 } from "../../helpers/addVal0";
-import { isMonth12 } from "../../helpers/isMonth12";
+import { validateDateDay } from "../../middleware/validateDateDay";
+import { validateDateMonth } from "../../middleware/validateDateMonth";
 
 export const totalSalesDay = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  
-  const dateParamns = req.params.date;
-  console.log(dateParamns);
+  const dateQuery = req.query.date;
 
-  const dateInic = new Date(dateParamns + "T00:00:00Z");
+  const dateInic = validateDateDay(res, dateQuery as string);
 
-  if (isNaN(dateInic.getTime())) {
-    res.status(404).json({
-      success: false,
-      message: "Formato de fecha inválido",
-    });
-  } else {
-    const dateEnd = new Date(dateParamns + "T23:59:59Z");
-    const sales = await sale.aggregate([
-      {
-        $match: {
-          createdAt: {
-            $gte: dateInic,
-            $lte: dateEnd,
+  const dateEnd = new Date(dateQuery + "T23:59:59Z");
+
+  const sales = await sale.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: dateInic,
+          $lte: dateEnd,
+        },
+      },
+    },
+    {
+      $unwind: "$products",
+    },
+    {
+      $group: {
+        _id: null,
+        totalVentas: {
+          $sum: {
+            $multiply: ["$products.quantity", "$products.data.price"],
           },
         },
       },
-      {
-        $unwind: "$products",
-      },
-      {
-        $group: {
-          _id: null,
-          totalVentas: {
-            $sum: {
-              $multiply: ["$products.quantity", "$products.data.price"],
-            },
-          },
-        },
-      },
-    ]);
+    },
+  ]);
 
-    if (sales.length == 0) {
+  if (sales.length === 0) {
+    
+    if (!res.headersSent) {
+       
       res.status(200).json({
         success: true,
-        message: "No hay ventas el día " + dateParamns,
+        sales: sales,
       });
       return;
     }
+  }
+  if (!res.headersSent) {
+    
     res.status(200).json({
       success: true,
       sales: sales,
@@ -60,80 +58,104 @@ export const totalSalesDay = async (
   }
 };
 
-export const totalSalesMonth = async (req: Request, res: Response, next: NextFunction) => {
-    const arr: string[] = req.params.date.split("-");
+export const totalSalesMonth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
 
-    let yearParams = Number(arr[0]);
-    const monthParams = Number(arr[1]);
-    const page = Number(req.query.p) | 0;
-    const pageSize = 10;
+  const monthQuery = req.query.date as string
+  const page = Number(req.query.p) | 0;
+  const pageSize = 10;
 
-    //compruebo si el valor es >=1 y <=9 se le agrega u 0 adelante del nurmero para que coincida con el formato Date y poder crear l objeto
-    let month = addVal0(monthParams);
+  
+  const dateMonth = validateDateMonth(res,monthQuery)
 
-    const dateInic = new Date(yearParams + "-" + month + "-01T00:00:00Z");
-
-    //compruebo si el formato de la fecha tipo Date es valido
-    isDateNaN(res, next, dateInic);
-
-    //compruebo si el mes 12 para poder calculal la fecha de fin en la consulta
-    const nextDate = isMonth12(Number(month), yearParams);
-
-    console.log("nextDate", nextDate);
-
-    let nextYear = nextDate.year;
-    let nextMonth = nextDate.month;
-
-    const dateEnd = new Date(nextYear + "-" + nextMonth + "-01T00:00:00Z");
-
-    const sales = await sale.aggregate([
-      {
-        $match: {
-          createdAt: {
-            $gte: dateInic,
-            $lt: dateEnd,
+  const sales = await sale.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: dateMonth.inic,
+          $lt: dateMonth.end,
+        },
+      },
+    },
+    {
+      $unwind: "$products",
+    },
+    {
+      $group: {
+        _id: {
+          $dayOfMonth: "$createdAt",
+        },
+        totalVentas: {
+          $sum: {
+            $multiply: ["$products.quantity", "$products.data.price"],
           },
         },
       },
-      {
-        $unwind: "$products",
+    },
+    {
+      $sort: {
+        _id: 1,
       },
-      {
-        $group: {
-          _id: {
-            $dayOfMonth: "$createdAt",
-          },
-          totalVentas: {
-            $sum: {
-              $multiply: ["$products.quantity", "$products.data.price"],
-            },
-          },
-        },
+    },
+    {
+      $facet: {
+        metadata: [{ $count: "count" }],
+        data: [{ $skip: page * pageSize }, { $limit: pageSize }],
       },
-      {
-        $sort: {
-          _id: 1,
-        },
-      },
-      {
-        $facet: {
-          metadata: [{ $count: "count" }],
-          data: [{ $skip: page * pageSize }, { $limit: pageSize }],
-        },
-      },
-    ]);
+    },
+  ]);
 
-    if (sales[0].data.length == 0) {
-      res.status(200).json({
-        success: true,
-        message: "No hay ventas el mes " + yearParams + "-" + month,
-      });
-      return;
-    }else{
-      res.status(200).json({
-        success: true,
-        sales: sales,
-      });
-      return
-    }
+  if (sales[0].data.length == 0) {
+    
+    if (!res.headersSent) {
+    res.status(200).json({
+      success: true,
+      sales: sales,
+    });
+    return;
+  }
+  } else {
+    
+    res.status(200).json({
+      success: true,
+      sales: sales,
+    });
+    return;
+  }
+};
+
+export const ordersStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const status = req.query.status;
+  const page = Number(req.query.p) | 0;
+  const pageSize = 10;
+
+  const sales = await sale.aggregate([
+    {
+      $match: {
+        status: status,
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+    {
+      $facet: {
+        metadata: [{ $count: "count" }],
+        data: [{ $skip: page * pageSize }, { $limit: pageSize }],
+      },
+    },
+  ]);
+  res.status(200).json({
+    status: status,
+    sales: sales,
+  });
 };

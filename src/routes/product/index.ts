@@ -3,6 +3,6 @@ import { getProduct} from "../../controllers/product";
 
 const productRoutes = Router();
 
-productRoutes.get("/product/:data", getProduct);
+productRoutes.get("/product", getProduct);
 
 export default productRoutes

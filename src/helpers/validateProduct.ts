@@ -1,48 +1,32 @@
 import { Request, Response, NextFunction } from "express";
 import product from "../models/product";
 import mongoose from "mongoose";
+import { ObjectId } from "mongodb";
 
-export async function validateProduct(res: Response, data: string) {
-  const dataParams = data;
-  let responseProduct: any;
-  let type: string = "";
+export async function validateProduct(data: string) {
+  
+  let dataParams = data;
+  let dataIdParams
 
   console.log(dataParams);
 
-  if (mongoose.Types.ObjectId.isValid(dataParams)) {
-    const responseId = await product.find({ _id: dataParams });
-    if (responseId.length == 0) {
-      responseProduct = [];
-    } else {
-      responseProduct = responseId[0]._id;
-      type = "_id";
-      console.log("_id", responseId);
-    }
-  } else {
-    const responseName = await product.find({ name: dataParams });
-    
-    if (responseName.length == 0) {
-      responseProduct = [];
-    } else {
-      responseProduct = responseName[0].name;
-      type = "name";
-      console.log("name", responseName)
-    }
-    
-  }
-  console.log(responseProduct.length);
+  if (!mongoose.Types.ObjectId.isValid(dataParams)) {
 
-  if (responseProduct.length == 0) {
-    res.json({
-      messaje: "No hay productos con ese id o name",
-    });
-    process.exit(1);
-  } else {
-    return {
-      type: type,
-      data: responseProduct,
-    };
+    dataIdParams = ObjectId.createFromBase64('aaaaaaaaaaaaaaaa')
+   
+  }else{
+    dataIdParams = dataParams
   }
 
-  //return responseProduct
+  const products = await product.find( {
+    $or: [{
+        _id: dataIdParams
+
+      },
+      {
+        name: dataParams
+      }
+    ]
+  })
+  return products
 }
