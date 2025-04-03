@@ -5,7 +5,8 @@ export interface IUser extends Document{
   lastname: string;
   password: string;
   email: string;
-  image: string
+  image: string;
+  tokenResetPass: string | null;
 }
 
 const UserSchema = new Schema(
@@ -24,6 +25,10 @@ const UserSchema = new Schema(
     },
     image: {
       type: String,
+    },
+    tokenResetPass:{
+      type: String,
+      defaul: null
     }
   },
   {
