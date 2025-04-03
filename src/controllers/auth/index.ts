@@ -55,7 +55,7 @@ export const register = {
     } else {
       newUser.image = "https://res.cloudinary.com/dxslpx4nf/image/upload/v1741468598/users/gyo1j8f7aa62qthp44sh.jpg";
     }
-
+    newUser.tokenResetPass = null
     //guardo en la base de datos el nuevo usuario
     await newUser.save();
 
@@ -156,4 +156,37 @@ export const showUsers = async (req:Request, res:Response, next:NextFunction)=>{
     success: true,
     user:users
   });
+}
+
+export const forgotPassword = {
+  //res.json({message:"hola"})
+  check: (req: Request, res: Response, next: NextFunction) => {
+
+    const schema = Joi.object<IUser>({
+      email: Joi.string().email().required(),
+    });
+
+    validateBody(req,next,res,schema)
+  },
+  do: async (req: Request, res: Response, next: NextFunction) => {
+    //let userData:IUser
+    const {email} = req.body
+  try {
+    const userData:IUser|null = await user.findOne({email:email})
+
+    if(userData == null){
+      const error = new Error("User not found");
+      throw error;
+    }
+
+    
+    console.log(userData)
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      message: ""+error,
+    });
+  }
+  }
+
 }
